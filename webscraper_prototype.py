@@ -18,20 +18,21 @@ options.add_argument("--start-maximized")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 driver.implicitly_wait(5)
 
-#get 위메프, find 검색창
+#get 위메프
 driver.get("https://front.wemakeprice.com/main")
-search_bar = driver.find_element(By.XPATH, '//*[@id="_searchKeyword"]')
-search_btn = driver.find_element(By.XPATH, '//*[@id="_searchKeywordBtn"]')
 
 #위메프 스크린샷 스크래퍼
-def get_wemake_screenshot():
-    #상품명 입력 및 검색
-    product_name = input("상품명을 입력하세요: ")
+def get_wemake_screenshot(product_name):
+    #검색버튼 찾기, 상품명 입력, 검색
+    search_bar = driver.find_element(By.XPATH, '//*[@id="_searchKeyword"]')
+    search_btn = driver.find_element(By.XPATH, '//*[@id="_searchKeywordBtn"]')
     search_bar.send_keys(product_name)
     search_btn.click()
-    #첫 상품 링크 클릭 (참고: 위메프의 경우 광고 링크일때도 있음)
-    product_link = driver.find_element(By.CLASS_NAME, 'list_conts_wrap')
-    product_link.click()
+    #첫 상품 링크 클릭
+    try:
+        driver.find_element(By.CLASS_NAME, 'list_conts_wrap').click()
+    except NoSuchElementException:
+        return
     driver.switch_to.window(driver.window_handles[-1])
     #쿠폰버튼 클릭
     try:
@@ -44,16 +45,23 @@ def get_wemake_screenshot():
     screenshot = screenshot_area.screenshot_as_png
     img = Image.open(io.BytesIO(screenshot))
     img.save(f"./Screenshots/{product_name}.png")
+    #홈페이지로 복귀
+    driver.switch_to.window(driver.window_handles[0])
+    driver.back()
+    driver.refresh()
  
 
+#상품명 입력 function
+def input_product_name():
+    while True:
+        product_name = input("상품명을 입력하세요 (끝내려면 quit 입력): ")
+        if product_name == "quit":
+            break
+        else:
+            get_wemake_screenshot(product_name)
+
 #Testing
-get_wemake_screenshot()
-
-#To Add: Loop 기능, 쿠폰정보 스크롤 기능
-
-#웹스크래퍼 동작 시나리오: 실행 -> Open site -> 유저가 상품명 입력 -> site 검색창에 상품명 입력 -> 첫번째 결과물 링크 찾아 입장 -> 쿠폰정보 열기
-#-> -> 제품상세페이지 스크린샷 -> 홈 화면 복귀 -> 상품명이 "quit" 일때까지 반복
-#To Add: Read 상품명 from .txt file, 스크린샷 파일 저장 시스템.
+input_product_name()
 
 
 
