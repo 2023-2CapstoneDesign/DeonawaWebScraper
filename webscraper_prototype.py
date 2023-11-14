@@ -52,34 +52,11 @@ def get_wemake_screenshot(product_name):
  
 
 #상품명 입력 function
-def input_product_name():
-    while True:
-        product_name = input("상품명을 입력하세요 (끝내려면 quit 입력): ")
-        if product_name == "quit":
-            break
-        else:
-            get_wemake_screenshot(product_name)
+def search_product_name():
+    with open('product_names.txt', 'r') as file:
+        product_names = file.read().splitlines()
+    for product_name in product_names:
+        get_wemake_screenshot(product_name)
 
 #Testing
-input_product_name()
-
-
-
-""" 쿠팡 크롤러
-#Open 쿠팡 in chrome
-driver.get("https://www.coupang.com/")
-
-#쿠팡 검색창
-search_bar = driver.find_element(By.ID, 'headerSearchKeyword')
-search_btn = driver.find_element(By.ID, 'headerSearchBtn')
-
-#검색어 입력받고 제품 상세페이지 스크린샷 하는 function
-def get_cupang_screenshot():
-    #상품명 입력받기
-    product_name = input("상품명을 입력하세요: ")
-    #쿠팡 검색창 입력 및 검색
-    search_bar.send_keys(product_name)
-    search_btn.click() #ERROR: 페이지 접속 오류 뜸
-    #검색결과 첫 제품 클릭
-    #제품상세페이지 상품가격정보 스크린샷
-"""
+search_product_name()
